@@ -1,0 +1,2 @@
+data/gold.dat filter=lfs diff=lfs merge=lfs -text
+files/gold.dat filter=lfs diff=lfs merge=lfs -text
