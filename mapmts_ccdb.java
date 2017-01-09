@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Vector;
 import org.jlab.ccdb.CcdbPackage;
 import org.jlab.ccdb.JDBCProvider;
 import org.jlab.ccdb.SQLiteProvider;
@@ -20,7 +21,7 @@ public class mapmts_ccdb{
 
 					initHashMaps(pmtNameHash, parameterHash);
 
-					String tablePathName = "test/rich/mapmts";
+					String tablePathName = "/test/rich/ca7452";
 					String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
 
 					JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
@@ -47,14 +48,13 @@ public class mapmts_ccdb{
 					Integer colNum = parameterHash.get(parameter);
 					System.out.println("Column: " + colNum);
 
+					// get the data for the mapmt table
 					Assignment asgmt = provider.getData(tablePathName);
 
+					// get the column value from the hased value
+					Vector<String> data  = asgmt.getColumnValuesString(colNum);
 
-
-					asgmt.getColumnValuesString(colNum);
-
-
-
+					System.out.println(data.size());
 
 		}
 	}
