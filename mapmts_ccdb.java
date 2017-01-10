@@ -5,6 +5,8 @@ import org.jlab.ccdb.JDBCProvider;
 import org.jlab.ccdb.SQLiteProvider;
 import org.jlab.ccdb.MySqlProvider;
 import org.jlab.ccdb.Assignment;
+import java.util.Scanner;
+import java.io.Console;
 import org.jlab.ccdb.*;
 
 public class mapmts_ccdb{
@@ -15,47 +17,89 @@ public class mapmts_ccdb{
 		HashMap<String, Integer> pmtNameHash = new HashMap<String, Integer>();
 		HashMap<String, Integer> parameterHash = new HashMap<String, Integer>();
 
-		if (args.length < 4){
-			System.out.println("Insufficient command line arguements.");
-		}else{
+		if (args[0].equals("-s") == false){
+			if (args.length < 4) {
+				System.out.println("Run from command line: java -cp ccdb.jar: mapmts_ccdb [rich] [pmt name] [pixel] [pixel] [parameter]");
+			}else{
 
-					initHashMaps(pmtNameHash, parameterHash);
+				initHashMaps(pmtNameHash, parameterHash);
 
-					String tablePathName = "/test/rich/ca7452";
-					String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
+				String tablePathName = "/test/rich/ca7452";
+				String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
 
-					JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
-					provider.connect();
+				JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
+				provider.connect();
+				if (provider.getIsConnected()){
+					System.out.println("Connection to : " + connectionStr + ".");
+				}
 
-					if (provider.getIsConnected()){
-						System.out.println("Connection to : " + connectionStr + ".");
+				String richNum = args[0].toUpperCase();
+				String pmtName = args[1].toUpperCase();
+				String pixelNumber = args[2].toUpperCase();
+				String parameter = args[3].toUpperCase();
+
+				Integer sectorNum = Integer.parseInt(richNum);
+				System.out.println("Sector: " + sectorNum);
+
+				Integer pmtNum = pmtNameHash.get(pmtName);
+				System.out.println("Layer: " + pmtNum);
+
+				Integer pixelNum = Integer.parseInt(pixelNumber);
+				System.out.println("Component: " + pixelNum);
+
+				Integer colNum = parameterHash.get(parameter);
+				System.out.println("Column: " + colNum);
+
+				// get the data for the mapmt table
+				Assignment asgmt = provider.getData(tablePathName);
+
+				// get the column value from the hased value
+				Vector<String> data  = asgmt.getColumnValuesString(colNum);
+
+				System.out.println(data.size());
+
+
+			}
+		}else if (args[0].equals("-s")){
+
+			initHashMaps(pmtNameHash, parameterHash);
+
+			String tablePathName = "/test/rich/ca7452";
+			String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
+
+			JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
+			provider.connect();
+			System.out.println("Running Shell Mode");
+			Boolean exitProgram = false;
+			String cmd = "";
+
+			Console console = System.console();
+
+			while(cmd.equals("exit") == false){
+
+					cmd = console.readLine("> ");
+					String[] splitCmd = cmd.split(" ");
+
+					if (cmd.equals("exit") == false){
+
+						String richNum = splitCmd[0].toUpperCase();
+						String pmtName = splitCmd[1].toUpperCase();
+						String pixelNumber = splitCmd[2].toUpperCase();
+						String parameter = splitCmd[3].toUpperCase();
+
+						Integer sectorNum = Integer.parseInt(richNum);
+						System.out.println("Sector: " + richNum);
+
+						Integer pmtNum = pmtNameHash.get(pmtName);
+						System.out.println("Layer: " + pmtNum);
+
+						Integer pixelNum = Integer.parseInt(pixelNumber);
+						System.out.println("Component: " + pixelNum);
+
+						Integer colNum = parameterHash.get(parameter);
+						System.out.println("Column: " + colNum);
 					}
-
-					String richNum = args[0].toUpperCase();
-					String pmtName = args[1].toUpperCase();
-					String pixelNumber = args[2].toUpperCase();
-					String parameter = args[3].toUpperCase();
-
-					Integer sectorNum = Integer.parseInt(richNum);
-					System.out.println("Sector: " + sectorNum);
-
-					Integer pmtNum = pmtNameHash.get(pmtName);
-					System.out.println("Layer: " + pmtNum);
-
-					Integer pixelNum = Integer.parseInt(pixelNumber);
-					System.out.println("Component: " + pixelNum);
-
-					Integer colNum = parameterHash.get(parameter);
-					System.out.println("Column: " + colNum);
-
-					// get the data for the mapmt table
-					Assignment asgmt = provider.getData(tablePathName);
-
-					// get the column value from the hased value
-					Vector<String> data  = asgmt.getColumnValuesString(colNum);
-
-					System.out.println(data.size());
-
+			}
 		}
 	}
 
