@@ -1,6 +1,9 @@
 #!/bin/bash
-cd ccdb
-source environment.csh
-cd ..
 
-ccdb add /test/rich/mapmts -v default data/pmt_ccdb.txt
+source /group/clas12/environment.csh
+
+export CCDB_CONNECTION=mysql://clas12writer:geom3try@clasdb.jlab.org/clas12
+export CCDB_USER=lendacka
+
+clas12-ccdb -i
+
