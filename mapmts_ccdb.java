@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.List;
 import org.jlab.ccdb.CcdbPackage;
 import org.jlab.ccdb.JDBCProvider;
 import org.jlab.ccdb.SQLiteProvider;
@@ -11,20 +12,19 @@ import org.jlab.ccdb.*;
 
 public class mapmts_ccdb{
 
-
 	public static void main (String[] args){
 
 		HashMap<String, Integer> pmtNameHash = new HashMap<String, Integer>();
-		HashMap<String, Integer> parameterHash = new HashMap<String, Integer>();
+		HashMap<String, Integer> pmtStartingPos = new HashMap<String, Integer>();
 
 		if (args[0].equals("-s") == false){
 			if (args.length < 4) {
 				System.out.println("Run from command line: java -cp ccdb.jar: mapmts_ccdb [rich] [pmt name] [pixel] [pixel] [parameter]");
 			}else{
 
-				initHashMaps(pmtNameHash, parameterHash);
+				initHashMaps(pmtNameHash, pmtStartingPos);
 
-				String tablePathName = "/test/rich/ca7452";
+				String tablePathName = "/test/rich/mapmts_3";
 				String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
 
 				JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
@@ -36,7 +36,7 @@ public class mapmts_ccdb{
 				String richNum = args[0].toUpperCase();
 				String pmtName = args[1].toUpperCase();
 				String pixelNumber = args[2].toUpperCase();
-				String parameter = args[3].toUpperCase();
+				String parameter = args[3].toLowerCase();
 
 				Integer sectorNum = Integer.parseInt(richNum);
 				System.out.println("Sector: " + sectorNum);
@@ -47,24 +47,25 @@ public class mapmts_ccdb{
 				Integer pixelNum = Integer.parseInt(pixelNumber);
 				System.out.println("Component: " + pixelNum);
 
-				Integer colNum = parameterHash.get(parameter);
-				System.out.println("Column: " + colNum);
+				System.out.println("Column: " + parameter);
 
 				// get the data for the mapmt table
 				Assignment asgmt = provider.getData(tablePathName);
 
 				// get the column value from the hased value
-				Vector<String> data  = asgmt.getColumnValuesString(colNum);
+				//Vector<String> data  = asgmt.getColumnValuesString(colNum);
 
-				System.out.println(data.size());
+				//System.out.println(data.size());
+
+				getPMT_atPixel(asgmt, pmtName, pixelNum, parameter, pmtStartingPos);
 
 
 			}
 		}else if (args[0].equals("-s")){
 
-			initHashMaps(pmtNameHash, parameterHash);
+			initHashMaps(pmtNameHash, pmtStartingPos);
 
-			String tablePathName = "/test/rich/ca7452";
+			String tablePathName = "/test/rich/mapmts_3";
 			String connectionStr = "mysql://clas12reader@clasdb.jlab.org/clas12";
 
 			JDBCProvider provider = CcdbPackage.createProvider(connectionStr);
@@ -85,7 +86,7 @@ public class mapmts_ccdb{
 						String richNum = splitCmd[0].toUpperCase();
 						String pmtName = splitCmd[1].toUpperCase();
 						String pixelNumber = splitCmd[2].toUpperCase();
-						String parameter = splitCmd[3].toUpperCase();
+						String parameter = splitCmd[3].toLowerCase();
 
 						Integer sectorNum = Integer.parseInt(richNum);
 						System.out.println("Sector: " + richNum);
@@ -96,28 +97,56 @@ public class mapmts_ccdb{
 						Integer pixelNum = Integer.parseInt(pixelNumber);
 						System.out.println("Component: " + pixelNum);
 
-						Integer colNum = parameterHash.get(parameter);
-						System.out.println("Column: " + colNum);
+						System.out.println("Column: " + parameter);
+
+						// get the data for the mapmt table
+						Assignment asgmt = provider.getData(tablePathName);
+
+						getPMT_atPixel(asgmt, pmtName, pixelNum, parameter, pmtStartingPos);
 					}
 			}
 		}
 	}
 
 
-	private static void initHashMaps(HashMap<String, Integer> pmtNameHash, HashMap<String, Integer> parameterHash){
+	private static Double getPMT_atPixel(Assignment asgmt, String pmtName, Integer pixelNum, String parameter, HashMap<String, Integer> startingPos){
+
+		System.out.println(parameter);
+		Vector<Double> data = new Vector<Double>();
+		Vector<Double> fullData = asgmt.getColumnValuesDouble(parameter);
+
+		Integer startingInds = startingPos.get(pmtName);
+		//System.out.println(startingInds);
+
+		//FIXME: 'i' should start at the starting position for the given PMT..
+		int counter = 0;
+		for (int i = startingInds; i < startingInds + 64; i++){
+			//System.out.println(i);
+			data.add(fullData.get(i));
+		}
+
+		//System.out.println(data.size());
+		System.out.println(data.get(pixelNum - 1));
+
+		return data.get(pixelNum - 1);
+	}
+
+	private static void initHashMaps(HashMap<String, Integer> pmtNameHash, HashMap<String, Integer> startingPosHash){
 
 		DeviceNameFile pmtNames = new DeviceNameFile("files/pmts_db.txt");
 		ParameterFile paraFile = new ParameterFile("files/parameters.txt");
 
-		for (int i = 0; i < paraFile.getNumberOfParameters(); i++ ){
-			parameterHash.put(paraFile.getParameters().get(i), i+1);
-
-		}
-
-
 		for (int i = 0; i < pmtNames.getNumberOfDevices(); i++){
 			pmtNameHash.put(pmtNames.getDevices().get(i), i+1);
 		}
+
+		for (int i = 0; i < pmtNames.getNumberOfDevices(); i++){
+
+			startingPosHash.put(pmtNames.getDevices().get(i), i*64);
+			//System.out.println(pmtNames.getDevices().get(i) + " : " + startingPosHash.get(pmtNames.getDevices().get(i)));
+
+		}
+
 	}
 
 }
