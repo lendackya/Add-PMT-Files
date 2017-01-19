@@ -88,6 +88,11 @@ public class mapmts_ccdb{
 						String pixelNumber = splitCmd[2].toUpperCase();
 						String parameter = splitCmd[3].toLowerCase();
 
+						// if (splitCmd.length == 2){
+						// 	Assignment asgmt = provider.getData(tablePathName);
+						// 	getPMT_all(asgmt, pmtName, pmtStartingPos);
+						// }
+
 						Integer sectorNum = Integer.parseInt(richNum);
 						System.out.println("Sector: " + richNum);
 
@@ -106,19 +111,35 @@ public class mapmts_ccdb{
 					}
 			}
 		}
+
 	}
+
+	// private static Vector<Double> getPMT_all(Assignment asgmt, String pmtName, HashMap<String, Integer> startingPos){
+	//
+	// 	Vector<Double> data = new Vector<Double>();
+	//
+	// 	Integer startingInds = startingPos.get(pmtName);
+	// 	Vector<Double> fullData = new Vector<Double>();
+	// 	String[] str = {"sector", "layer", "component", "gain"};
+	// 	for (String para : str){
+	// 		fullData.add(asgmt.getColumnValuesDouble(para));
+	// 	}
+	//
+	// 	for (int i = startingInds; i < startingInds + 64; i++ ){
+	// 		data.add(fullData.get(i));
+	// 	}
+	//
+	// 	return data;
+	// }
 
 
 	private static Double getPMT_atPixel(Assignment asgmt, String pmtName, Integer pixelNum, String parameter, HashMap<String, Integer> startingPos){
 
-		System.out.println(parameter);
 		Vector<Double> data = new Vector<Double>();
 		Vector<Double> fullData = asgmt.getColumnValuesDouble(parameter);
 
 		Integer startingInds = startingPos.get(pmtName);
-		//System.out.println(startingInds);
 
-		//FIXME: 'i' should start at the starting position for the given PMT..
 		int counter = 0;
 		for (int i = startingInds; i < startingInds + 64; i++){
 			//System.out.println(i);
@@ -148,5 +169,4 @@ public class mapmts_ccdb{
 		}
 
 	}
-
 }
