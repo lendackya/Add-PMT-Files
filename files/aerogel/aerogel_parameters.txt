@@ -1,0 +1,1 @@
+name, topology, average density (g/cm3), average ref. index, side 1-2 (mm), side 2-3 (mm), side 3-4 (mm), side 4-1 (mm), thickness 1 (mm), thickness 2 (mm), thickness 3 (mm), thickness 4 (mm), transparency coefficient, scattering length (mm), planarity, comments
